@@ -18,14 +18,56 @@ require(tigerstats)
 require(tidyverse)
 ```
 
+## read in fishy data
+```{r}
+fishAll = read_csv('Fish.csv')
+```
+
+
 # Predicting Fish Weight
 
 
 ## Perch
 
-### Best Models
+```{r}
+perchFish = filter(fishAll, Species=='Perch')
+perchModel = lm(Weight~Length1+Length2+Length3+Height+Width, data= perchFish)
+summary.lm(perchModel)
 
-### Best Two regressor model
+```
+
+```{r}
+library(leaps)
+regsubsets.out <-
+    regsubsets(Weight ~ Length1 + Length2 + Length3 + Height +  Width, data = perchFish,
+               nbest = 1,       # 1 best model for each number of predictors
+               nvmax = NULL,    # NULL for no limit on number of variables
+               force.in = NULL, force.out = NULL,
+               method = "exhaustive")
+
+summary.out <- summary(regsubsets.out)
+as.data.frame(summary.out$outmat)
+
+library(car)
+subsets(regsubsets.out,statistic="adjr2",legend="bottomright",main="Adjusted R^2")
+```
+  
+## Which is best??  
+
+```{r}
+which.max(summary.out$adjr2)
+```
+
+
+```{r}
+summary.out$which[3,]
+```
+```{r}
+#best model
+perchBest2=lm(Weight~Height+Width, data=perchFish)
+summary.lm(perchBest2)
+```
+
 
 
 ## Pike
